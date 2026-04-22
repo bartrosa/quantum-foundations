@@ -209,3 +209,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# LaTeX builds under papers/ (sources tracked; artifacts local)
+papers/**/*.aux
+papers/**/*.log
+papers/**/*.out
+papers/**/*.toc
+papers/**/*.synctex.gz
+papers/**/*.fdb_latexmk
+papers/**/*.fls
+papers/**/*.pdf
