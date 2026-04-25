@@ -222,3 +222,53 @@ row is missing or a Gibbs check failed, read the co-located ``*.log`` in
 placement diagnostics record skip paths (e.g. no host rank) and
 ``STRUCTURAL DIFF EMPTY`` when the “at *r*” and “at infinity” labeled DAGs
 coincide, which invalidates a naive ``|Aut|`` comparison.
+
+## 11. Conway games on causets: formal extension
+
+Define a Conway causet as a tuple
+
+`C = (N, rank, P_L, P_R)`
+
+with `P_L(i), P_R(i) ⊂ {j : rank(j) < rank(i)}`. The colored Hasse edge
+relation is:
+
+- `u -> v` with color `L` iff `u ∈ P_L(v)` and `u ∉ P_R(v)`,
+- `u -> v` with color `R` iff `u ∈ P_R(v)` and `u ∉ P_L(v)`,
+- `u -> v` with color `LR` iff `u ∈ P_L(v) ∩ P_R(v)`.
+
+`Aut_LR(C)` is the group of bijections preserving rank and colored edges.
+
+### Subdivision lemma (edge-color to vertex-color reduction)
+
+For each colored edge `(u, v, c)`, insert a fresh marker vertex `m_e` and
+replace the edge by `u -> m_e -> v`, where marker color class encodes `c`.
+Original vertices keep rank-based color classes disjoint from marker classes.
+
+Then colored-edge-preserving automorphisms of `C` are in bijection with
+vertex-color-preserving automorphisms of the subdivided graph.
+
+*Sketch.* Marker and original vertices cannot mix (disjoint colors); marker
+color fixes edge class; path incidence enforces consistent endpoint mapping.
+
+### Outcome classes
+
+For shallow outcomes:
+
+- `=` if `P_L = P_R = ∅`,
+- `L` if `P_L != ∅` and `P_R = ∅`,
+- `R` if `P_L = ∅` and `P_R != ∅`,
+- `||` otherwise.
+
+Recursive outcomes are computed separately via memoized descent.
+
+### Coarse-graining relations
+
+- Twin relation: identical local colored neighborhood `(rank, P_L, P_R, child_L, child_R)`.
+- Outcome relation (shallow): identical `(rank, shallow_outcome)`.
+
+Entropy hierarchy in algebraic convention:
+
+`S_rank ≥ S_pos ≥ S_twin ≥ S_outcome ≥ 0`.
+
+Each step is a surjective quotient on state labels/orbits, so logarithmic
+counts cannot increase under coarse-graining.

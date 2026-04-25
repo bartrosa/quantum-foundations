@@ -70,6 +70,17 @@ If your GitHub username or repo name differs from `bartrosa/quantum-foundations`
   - `uv run qf-run-e2` — E2 Gibbs paradox exact test
   - `uv run qf-run-e3` — E3 Verlinde-style distance sanity check
 
+## Conway games extension
+
+- **Companion**: [`papers/conway-causets/COMPANION.md`](papers/conway-causets/COMPANION.md)
+- **Module**: `quantum_foundations.conway_games`
+- **CLI**:
+  - `uv run qf-run-e4` — E4 Conway automorphism scaling
+  - `uv run qf-run-e5` — E5 four-valued outcome distribution
+  - `uv run qf-run-e6` — E6 hierarchy collapse rates
+  - `uv run qf-run-e7` — E7 Conway Gibbs checks
+- **Make target**: `make run-conway`
+
 ## License
 
 MIT — see `LICENSE`.

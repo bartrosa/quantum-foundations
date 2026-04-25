@@ -124,7 +124,31 @@ Fit `ΔS ~ r^β`:
 7. Connection to CSG (Rideout–Sorkin) and growth dynamics.
 8. Robustness of exponents to rank budget and sample rate.
 
-## 8. Observability and reproducibility
+## 8. Conway extension: edge-colored causets and four-valued outcome
+
+The Conway extension replaces single-option events with short-game events
+`e = {P_L | P_R}`. In graph terms, each Hasse edge is colored by membership in
+Left options (`L`), Right options (`R`), or both (`LR`).
+
+This extension is motivated by two diagnostics:
+
+- Whether color constraints break rigidity at the twin-quotient level and
+  produce nontrivial skeleton automorphisms.
+- Whether four-valued outcomes `o(e) ∈ {L, R, =, ||}` expose nontrivial
+  population-level structure (especially fuzzy classes).
+
+Hypotheses tested in E4-E7:
+
+1. **E4:** `log|Aut_twin|` is sometimes positive (unlike the rigid bare regime).
+2. **E5:** outcome histogram has nondegenerate mass in all four classes.
+3. **E6:** hierarchy collapse terms identify the dominant coarse-graining step.
+4. **E7:** Gibbs identities remain exact with colored automorphisms.
+
+Scope limit: this is a **structural** Conway extension. We do not implement full
+Conway algebra (disjunctive sum, canonical reduction, surreal values) in this
+iteration.
+
+## 9. Observability and reproducibility
 
 The CLI entry points ``qf-run-e1``, ``qf-run-e2``, and ``qf-run-e3`` call
 :func:`quantum_foundations.entropic_causets.configure_experiment_logging` so each
