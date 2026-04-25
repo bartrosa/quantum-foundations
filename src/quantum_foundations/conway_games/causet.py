@@ -172,6 +172,126 @@ def build_random_conway_causet(
     )
 
 
+def build_coupled_pool_conway_causet(
+    n_target: int,
+    *,
+    max_rank: int,
+    pool_overlap: float = 0.5,
+    sample_rate: float = 0.3,
+    seed: int | None = None,
+) -> ConwayCauset:
+    """Build a random Conway causet with explicit L-pool / R-pool overlap control.
+
+    For each rank ``j > 0``, predecessors are all events with rank ``< j``.
+    Those indices are shuffled once per rank, then partitioned into:
+
+    * L-only zone: length ``floor(|prev| * (1 - pool_overlap) / 2)``
+    * shared zone: length ``floor(|prev| * pool_overlap)``
+    * R-only zone: the remaining indices
+
+    For each new event at rank ``j``, ``P_L`` is built from L-only and shared
+    zones, ``P_R`` from R-only and shared, with an independent Bernoulli
+    ``sample_rate`` draw per predecessor in each zone (two independent draws
+    for each element in the shared zone).
+
+    Args:
+        n_target: Target number of events (must be ``>= 1``).
+        max_rank: Maximum rank (inclusive); ranks used are ``0 .. max_rank``.
+        pool_overlap: Fraction of the predecessor pool placed in the shared
+            (LR-sample) zone, in ``[0, 1]``.
+        sample_rate: Inclusion probability per predecessor in its zone(s).
+        seed: RNG seed for reproducibility; ``None`` is treated as ``0``.
+
+    Returns:
+        A well-formed ``ConwayCauset`` with ``n_target`` events.
+
+    Raises:
+        ValueError: Invalid parameters or ill-formed constraints.
+
+    Notes:
+        Ranks are spread as evenly as possible across ``0 .. max_rank``.
+        The same zone partition applies to every event at rank ``j``; only
+        the Bernoulli samples differ per event. Game-tree rank labelling breaks
+        many abstract symmetries, so         ``|Aut|`` is often trivial for small
+        ``n`` — this builder targets overlap *statistics*, not symmetry art.
+
+    Demo (mean ``log|Aut|`` and LR-edge counts vs ``pool_overlap``)::
+
+        python -m quantum_foundations.conway_games.coupled_pool_demo
+    """
+    if n_target < 1:
+        raise ValueError("n_target must be >= 1")
+    if max_rank < 0:
+        raise ValueError("max_rank must be non-negative")
+    if not 0.0 <= pool_overlap <= 1.0:
+        raise ValueError("pool_overlap must be in [0, 1]")
+    if not 0.0 <= sample_rate <= 1.0:
+        raise ValueError("sample_rate must be in [0, 1]")
+
+    base_seed = 0 if seed is None else int(seed)
+    n_ranks = max_rank + 1
+    base, rem = divmod(n_target, n_ranks)
+    counts = [base + (1 if r < rem else 0) for r in range(n_ranks)]
+    ranks: list[int] = []
+    for r in range(n_ranks):
+        ranks.extend([r] * counts[r])
+
+    p_left: list[frozenset[int]] = []
+    p_right: list[frozenset[int]] = []
+    zone_cache: dict[int, tuple[list[int], list[int], list[int]]] = {}
+
+    for i in range(n_target):
+        j = ranks[i]
+        if j == 0:
+            p_left.append(frozenset())
+            p_right.append(frozenset())
+            continue
+
+        prev = [k for k in range(i) if ranks[k] < j]
+        if not prev:
+            p_left.append(frozenset())
+            p_right.append(frozenset())
+            continue
+
+        if j not in zone_cache:
+            rng_shuffle = np.random.default_rng(base_seed + j * 1_000_003)
+            shuffled: list[int] = list(rng_shuffle.permutation(prev))
+            n_prev = len(shuffled)
+            n_l = int(np.floor(n_prev * (1.0 - pool_overlap) / 2.0))
+            n_s = int(np.floor(n_prev * pool_overlap))
+            zone_l = shuffled[:n_l]
+            zone_s = shuffled[n_l : n_l + n_s]
+            zone_r = shuffled[n_l + n_s :]
+            zone_cache[j] = (zone_l, zone_s, zone_r)
+
+        zone_l, zone_s, zone_r = zone_cache[j]
+        rng_e = np.random.default_rng(base_seed + j * 1_000_003 + i * 2_654_435_761)
+
+        left: set[int] = set()
+        right: set[int] = set()
+        for p in zone_l:
+            if rng_e.random() < sample_rate:
+                left.add(p)
+        for p in zone_r:
+            if rng_e.random() < sample_rate:
+                right.add(p)
+        for p in zone_s:
+            if rng_e.random() < sample_rate:
+                left.add(p)
+            if rng_e.random() < sample_rate:
+                right.add(p)
+
+        p_left.append(frozenset(left))
+        p_right.append(frozenset(right))
+
+    return ConwayCauset(
+        n=n_target,
+        rank=tuple(ranks),
+        past_left=tuple(p_left),
+        past_right=tuple(p_right),
+    )
+
+
 def make_chain_conway(n: int, color: str = "L") -> ConwayCauset:
     """Build chain of length ``n`` with each cover edge in selected color."""
     rank = tuple(range(n))
