@@ -10,7 +10,12 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Bartłomiej Rosa" }]
-dependencies = []
+dependencies = [
+    "matplotlib>=3.8",
+    "networkx>=3.2",
+    "numpy>=2.0",
+    "pandas>=2.2",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -19,11 +24,18 @@ dev = [
     "mypy>=1.13",
     "notebook>=7.0",
     "ipykernel>=6.29",
+    "tqdm>=4.66",
+]
+fast-aut = [
+    "pynauty>=2.8",
 ]
 
 [project.scripts]
 qf-verify-probe = "quantum_foundations.cli:main_verify_probe"
 qf-verify-edge-fano = "quantum_foundations.cli:main_verify_edge_fano"
+qf-run-e1 = "quantum_foundations.cli:main_run_e1_aut_scaling"
+qf-run-e2 = "quantum_foundations.cli:main_run_e2_gibbs"
+qf-run-e3 = "quantum_foundations.cli:main_run_e3_verlinde"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/quantum_foundations"]
