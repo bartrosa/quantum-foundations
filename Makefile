@@ -1,4 +1,4 @@
-.PHONY: sync test lint fmt check verify-probe verify-edge notebooks-execute paper
+.PHONY: sync test lint fmt check verify-probe verify-edge notebooks-execute paper run-e1 run-e2 run-e3 run-all
 
 sync:
 	uv sync --all-extras
@@ -26,3 +26,14 @@ notebooks-execute:
 
 paper:
 	cd papers/sedenion-associator-probe && ./build.sh paper
+
+run-e1:
+	uv run qf-run-e1
+
+run-e2:
+	uv run qf-run-e2
+
+run-e3:
+	uv run qf-run-e3
+
+run-all: run-e1 run-e2 run-e3
