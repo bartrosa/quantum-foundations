@@ -5,6 +5,7 @@ from quantum_foundations.conway_games.experiments import (
     e5_outcome_distribution,
     e6_hierarchy_collapse,
     e7_conway_gibbs,
+    e8_generator_comparison,
 )
 
 
@@ -26,3 +27,8 @@ def test_e6_smoke() -> None:
 def test_e7_smoke() -> None:
     result = e7_conway_gibbs.run(seeds=1, ns=(8,))
     assert len(result.rows) == 2
+
+
+def test_e8_experiments_smoke() -> None:
+    result = e8_generator_comparison.run(n_workers=2, seeds=1, max_n=15, log_queue=None)
+    assert len(result.rows) == 23
