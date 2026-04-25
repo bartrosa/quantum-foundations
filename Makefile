@@ -1,4 +1,4 @@
-.PHONY: sync test lint fmt check verify-probe verify-edge notebooks-execute paper run-e1 run-e2 run-e3 run-all
+.PHONY: sync test lint fmt check verify-probe verify-edge notebooks-execute paper run-e1 run-e2 run-e3 run-all run-e4 run-e5 run-e6 run-e7 run-conway
 
 sync:
 	uv sync --all-extras
@@ -37,3 +37,17 @@ run-e3:
 	uv run qf-run-e3
 
 run-all: run-e1 run-e2 run-e3
+
+run-e4:
+	uv run qf-run-e4
+
+run-e5:
+	uv run qf-run-e5
+
+run-e6:
+	uv run qf-run-e6
+
+run-e7:
+	uv run qf-run-e7
+
+run-conway: run-e4 run-e5 run-e6 run-e7
