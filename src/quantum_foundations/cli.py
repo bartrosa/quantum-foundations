@@ -1,4 +1,5 @@
 """Console entry points for publication-side reproducibility."""
+
 from __future__ import annotations
 
 import argparse
@@ -7,6 +8,12 @@ import os
 import sys
 from pathlib import Path
 
+from quantum_foundations.conway_games.experiments import (
+    e4_conway_aut_scaling,
+    e5_outcome_distribution,
+    e6_hierarchy_collapse,
+    e7_conway_gibbs,
+)
 from quantum_foundations.entropic_causets.experiments import (
     e1_aut_scaling,
     e2_gibbs,
@@ -140,3 +147,85 @@ def main_run_e3_verlinde() -> None:
     except Exception:
         log.exception("E3 crashed")
         raise
+
+
+def _parse_e4_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run E4 Conway |Aut| scaling.")
+    parser.add_argument("--n-workers", type=int, default=max(1, (os.cpu_count() or 1) - 1))
+    parser.add_argument("--seeds", type=int, default=10)
+    parser.add_argument("--max-n", type=int, default=100)
+    parser.add_argument("--output-dir", type=Path, default=Path("papers/conway-causets/results"))
+    return parser.parse_args()
+
+
+def main_run_e4_conway_aut_scaling() -> None:
+    args = _parse_e4_args()
+    log_path = configure_experiment_logging("e4_conway_aut_scaling", args.output_dir)
+    log = logging.getLogger("quantum_foundations.cli.e4")
+    ns = tuple(n for n in (15, 20, 30, 50, 70, 100) if n <= args.max_n)
+    result = e4_conway_aut_scaling.run(n_workers=args.n_workers, seeds=args.seeds, ns=ns)
+    e4_conway_aut_scaling.write_outputs(result, args.output_dir)
+    log.info("E4 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+
+
+def _parse_e5_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run E5 outcome distribution.")
+    parser.add_argument("--n-workers", type=int, default=max(1, (os.cpu_count() or 1) - 1))
+    parser.add_argument("--seeds", type=int, default=10)
+    parser.add_argument("--max-n", type=int, default=200)
+    parser.add_argument("--output-dir", type=Path, default=Path("papers/conway-causets/results"))
+    return parser.parse_args()
+
+
+def main_run_e5_outcome_distribution() -> None:
+    args = _parse_e5_args()
+    log_path = configure_experiment_logging("e5_outcome_distribution", args.output_dir)
+    log = logging.getLogger("quantum_foundations.cli.e5")
+    ns = tuple(n for n in (30, 50, 100, 200) if n <= args.max_n)
+    result = e5_outcome_distribution.run(n_workers=args.n_workers, seeds=args.seeds, ns=ns)
+    e5_outcome_distribution.write_outputs(result, args.output_dir)
+    log.info("E5 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+
+
+def _parse_e6_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run E6 hierarchy collapse.")
+    parser.add_argument("--n-workers", type=int, default=max(1, (os.cpu_count() or 1) - 1))
+    parser.add_argument("--seeds", type=int, default=10)
+    parser.add_argument("--max-n", type=int, default=100)
+    parser.add_argument("--output-dir", type=Path, default=Path("papers/conway-causets/results"))
+    return parser.parse_args()
+
+
+def main_run_e6_hierarchy_collapse() -> None:
+    args = _parse_e6_args()
+    log_path = configure_experiment_logging("e6_hierarchy_collapse", args.output_dir)
+    log = logging.getLogger("quantum_foundations.cli.e6")
+    ns = tuple(n for n in (20, 30, 50, 70, 100) if n <= args.max_n)
+    result = e6_hierarchy_collapse.run(n_workers=args.n_workers, seeds=args.seeds, ns=ns)
+    e6_hierarchy_collapse.write_outputs(result, args.output_dir)
+    log.info("E6 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+
+
+def _parse_e7_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run E7 Conway Gibbs checks.")
+    parser.add_argument("--seeds", type=int, default=10)
+    parser.add_argument("--max-n", type=int, default=20)
+    parser.add_argument("--output-dir", type=Path, default=Path("papers/conway-causets/results"))
+    return parser.parse_args()
+
+
+def main_run_e7_conway_gibbs() -> None:
+    args = _parse_e7_args()
+    log_path = configure_experiment_logging("e7_conway_gibbs", args.output_dir)
+    log = logging.getLogger("quantum_foundations.cli.e7")
+    ns = tuple(n for n in (10, 15, 20) if n <= args.max_n)
+    result = e7_conway_gibbs.run(seeds=args.seeds, ns=ns)
+    e7_conway_gibbs.write_outputs(result, args.output_dir)
+    if result.summary.fail_count > 0 or result.summary.s_a_fail_count > 0:
+        sys.exit(1)
+    log.info(
+        "E7 finished | pass=%d fail=%d | log=%s",
+        result.summary.pass_count,
+        result.summary.fail_count,
+        log_path,
+    )
