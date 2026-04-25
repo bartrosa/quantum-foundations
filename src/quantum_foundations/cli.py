@@ -19,9 +19,18 @@ from quantum_foundations.entropic_causets.experiments import (
     e2_gibbs,
     e3_verlinde,
 )
-from quantum_foundations.entropic_causets.logging_setup import configure_experiment_logging
+from quantum_foundations.entropic_causets.logging_setup import configure_main_process_logging
 from quantum_foundations.sedenion.edge_fano import verify_edge_fano_bijection
 from quantum_foundations.sedenion.probe_verification import verify_probe_classification
+
+
+def _flush_logging_handlers() -> None:
+    root = logging.getLogger("quantum_foundations")
+    for handler in root.handlers:
+        try:
+            handler.flush()
+        except Exception:
+            continue
 
 
 def main_verify_probe() -> None:
@@ -64,7 +73,11 @@ def _parse_e1_args() -> argparse.Namespace:
 def main_run_e1_aut_scaling() -> None:
     """qf-run-e1: |Aut| scaling experiment."""
     args = _parse_e1_args()
-    log_path = configure_experiment_logging("e1_aut_scaling", args.output_dir)
+    log_path, listener, log_queue = configure_main_process_logging(
+        "e1_aut_scaling",
+        args.output_dir,
+    )
+    listener.start()
     log = logging.getLogger("quantum_foundations.cli.e1")
     log.info("starting E1 with args: %s", vars(args))
     ns = tuple(n for n in (20, 30, 50, 70, 100, 150, 200) if n <= args.max_n)
@@ -73,6 +86,7 @@ def main_run_e1_aut_scaling() -> None:
             n_workers=args.n_workers,
             seeds=args.seeds,
             ns=ns,
+            log_queue=log_queue,
         )
         e1_aut_scaling.write_outputs(result, args.output_dir, n_workers=args.n_workers)
         f1 = result.fit.get("log_aut_pos")
@@ -85,6 +99,8 @@ def main_run_e1_aut_scaling() -> None:
     except Exception:
         log.exception("E1 crashed")
         raise
+    finally:
+        listener.stop()
 
 
 def _parse_e2_args() -> argparse.Namespace:
@@ -99,12 +115,18 @@ def _parse_e2_args() -> argparse.Namespace:
 def main_run_e2_gibbs() -> None:
     """qf-run-e2: Gibbs paradox test."""
     args = _parse_e2_args()
-    log_path = configure_experiment_logging("e2_gibbs", args.output_dir)
+    log_path, listener, log_queue = configure_main_process_logging("e2_gibbs", args.output_dir)
+    listener.start()
     log = logging.getLogger("quantum_foundations.cli.e2")
     log.info("starting E2 with args: %s", vars(args))
     ns = tuple(n for n in (15, 20, 30) if n <= args.max_n)
     try:
-        result = e2_gibbs.run(n_workers=args.n_workers, seeds=args.seeds, ns=ns)
+        result = e2_gibbs.run(
+            n_workers=args.n_workers,
+            seeds=args.seeds,
+            ns=ns,
+            log_queue=log_queue,
+        )
         e2_gibbs.write_outputs(result, args.output_dir)
         log.info(
             "E2 finished | pass=%d fail=%d max_deviation=%.6e | log=%s",
@@ -118,6 +140,8 @@ def main_run_e2_gibbs() -> None:
     except Exception:
         log.exception("E2 crashed")
         raise
+    finally:
+        listener.stop()
 
 
 def _parse_e3_args() -> argparse.Namespace:
@@ -131,11 +155,12 @@ def _parse_e3_args() -> argparse.Namespace:
 def main_run_e3_verlinde() -> None:
     """qf-run-e3: Verlinde distance scaling."""
     args = _parse_e3_args()
-    log_path = configure_experiment_logging("e3_verlinde", args.output_dir)
+    log_path, listener, log_queue = configure_main_process_logging("e3_verlinde", args.output_dir)
+    listener.start()
     log = logging.getLogger("quantum_foundations.cli.e3")
     log.info("starting E3 with args: %s", vars(args))
     try:
-        result = e3_verlinde.run(n_workers=args.n_workers, seeds=args.seeds)
+        result = e3_verlinde.run(n_workers=args.n_workers, seeds=args.seeds, log_queue=log_queue)
         e3_verlinde.write_outputs(result, args.output_dir)
         f3 = result.fit.get("delta_s_b_pos")
         log.info(
@@ -147,6 +172,8 @@ def main_run_e3_verlinde() -> None:
     except Exception:
         log.exception("E3 crashed")
         raise
+    finally:
+        listener.stop()
 
 
 def _parse_e4_args() -> argparse.Namespace:
@@ -160,12 +187,34 @@ def _parse_e4_args() -> argparse.Namespace:
 
 def main_run_e4_conway_aut_scaling() -> None:
     args = _parse_e4_args()
-    log_path = configure_experiment_logging("e4_conway_aut_scaling", args.output_dir)
+    log_path, listener, log_queue = configure_main_process_logging(
+        "e4_conway_aut_scaling",
+        args.output_dir,
+    )
+    listener.start()
     log = logging.getLogger("quantum_foundations.cli.e4")
     ns = tuple(n for n in (15, 20, 30, 50, 70, 100) if n <= args.max_n)
-    result = e4_conway_aut_scaling.run(n_workers=args.n_workers, seeds=args.seeds, ns=ns)
-    e4_conway_aut_scaling.write_outputs(result, args.output_dir)
-    log.info("E4 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+    interrupted = False
+    try:
+        result = e4_conway_aut_scaling.run(
+            n_workers=args.n_workers,
+            seeds=args.seeds,
+            ns=ns,
+            log_queue=log_queue,
+        )
+        e4_conway_aut_scaling.write_outputs(result, args.output_dir)
+        log.info("E4 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+    except KeyboardInterrupt:
+        interrupted = True
+        log.warning("CLI caught KeyboardInterrupt that escaped run()")
+    finally:
+        try:
+            listener.stop()
+        except Exception:
+            pass
+    if interrupted:
+        _flush_logging_handlers()
+        os._exit(130)
 
 
 def _parse_e5_args() -> argparse.Namespace:
@@ -179,12 +228,34 @@ def _parse_e5_args() -> argparse.Namespace:
 
 def main_run_e5_outcome_distribution() -> None:
     args = _parse_e5_args()
-    log_path = configure_experiment_logging("e5_outcome_distribution", args.output_dir)
+    log_path, listener, log_queue = configure_main_process_logging(
+        "e5_outcome_distribution",
+        args.output_dir,
+    )
+    listener.start()
     log = logging.getLogger("quantum_foundations.cli.e5")
     ns = tuple(n for n in (30, 50, 100, 200) if n <= args.max_n)
-    result = e5_outcome_distribution.run(n_workers=args.n_workers, seeds=args.seeds, ns=ns)
-    e5_outcome_distribution.write_outputs(result, args.output_dir)
-    log.info("E5 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+    interrupted = False
+    try:
+        result = e5_outcome_distribution.run(
+            n_workers=args.n_workers,
+            seeds=args.seeds,
+            ns=ns,
+            log_queue=log_queue,
+        )
+        e5_outcome_distribution.write_outputs(result, args.output_dir)
+        log.info("E5 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+    except KeyboardInterrupt:
+        interrupted = True
+        log.warning("CLI caught KeyboardInterrupt that escaped run()")
+    finally:
+        try:
+            listener.stop()
+        except Exception:
+            pass
+    if interrupted:
+        _flush_logging_handlers()
+        os._exit(130)
 
 
 def _parse_e6_args() -> argparse.Namespace:
@@ -198,12 +269,34 @@ def _parse_e6_args() -> argparse.Namespace:
 
 def main_run_e6_hierarchy_collapse() -> None:
     args = _parse_e6_args()
-    log_path = configure_experiment_logging("e6_hierarchy_collapse", args.output_dir)
+    log_path, listener, log_queue = configure_main_process_logging(
+        "e6_hierarchy_collapse",
+        args.output_dir,
+    )
+    listener.start()
     log = logging.getLogger("quantum_foundations.cli.e6")
     ns = tuple(n for n in (20, 30, 50, 70, 100) if n <= args.max_n)
-    result = e6_hierarchy_collapse.run(n_workers=args.n_workers, seeds=args.seeds, ns=ns)
-    e6_hierarchy_collapse.write_outputs(result, args.output_dir)
-    log.info("E6 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+    interrupted = False
+    try:
+        result = e6_hierarchy_collapse.run(
+            n_workers=args.n_workers,
+            seeds=args.seeds,
+            ns=ns,
+            log_queue=log_queue,
+        )
+        e6_hierarchy_collapse.write_outputs(result, args.output_dir)
+        log.info("E6 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+    except KeyboardInterrupt:
+        interrupted = True
+        log.warning("CLI caught KeyboardInterrupt that escaped run()")
+    finally:
+        try:
+            listener.stop()
+        except Exception:
+            pass
+    if interrupted:
+        _flush_logging_handlers()
+        os._exit(130)
 
 
 def _parse_e7_args() -> argparse.Namespace:
@@ -216,16 +309,23 @@ def _parse_e7_args() -> argparse.Namespace:
 
 def main_run_e7_conway_gibbs() -> None:
     args = _parse_e7_args()
-    log_path = configure_experiment_logging("e7_conway_gibbs", args.output_dir)
+    log_path, listener, _log_queue = configure_main_process_logging(
+        "e7_conway_gibbs",
+        args.output_dir,
+    )
+    listener.start()
     log = logging.getLogger("quantum_foundations.cli.e7")
     ns = tuple(n for n in (10, 15, 20) if n <= args.max_n)
-    result = e7_conway_gibbs.run(seeds=args.seeds, ns=ns)
-    e7_conway_gibbs.write_outputs(result, args.output_dir)
-    if result.summary.fail_count > 0 or result.summary.s_a_fail_count > 0:
-        sys.exit(1)
-    log.info(
-        "E7 finished | pass=%d fail=%d | log=%s",
-        result.summary.pass_count,
-        result.summary.fail_count,
-        log_path,
-    )
+    try:
+        result = e7_conway_gibbs.run(seeds=args.seeds, ns=ns)
+        e7_conway_gibbs.write_outputs(result, args.output_dir)
+        if result.summary.fail_count > 0 or result.summary.s_a_fail_count > 0:
+            sys.exit(1)
+        log.info(
+            "E7 finished | pass=%d fail=%d | log=%s",
+            result.summary.pass_count,
+            result.summary.fail_count,
+            log_path,
+        )
+    finally:
+        listener.stop()

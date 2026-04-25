@@ -13,7 +13,7 @@ def test_configure_experiment_logging_creates_file(tmp_path: Path) -> None:
     assert log_path.exists()
     assert log_path.suffix == ".log"
     text = log_path.read_text(encoding="utf-8")
-    assert "logging configured" in text
+    assert "main process logging configured" in text
     assert len(text) > 20
 
 

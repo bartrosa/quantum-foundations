@@ -13,7 +13,9 @@ from quantum_foundations.conway_games.entropy import (
     ConwayEntropyDecomposition,
     entropy_decomposition_conway,
     outcome_quotient_conway,
-    twin_classes_conway,
+    twin_classes_canonical,
+    twin_classes_local,
+    twin_quotient_canonical,
     twin_quotient_conway,
 )
 from quantum_foundations.conway_games.outcome import (
@@ -37,6 +39,8 @@ __all__ = [
     "pynauty_available_conway",
     "recursive_outcome",
     "shallow_outcome",
-    "twin_classes_conway",
+    "twin_classes_canonical",
+    "twin_classes_local",
+    "twin_quotient_canonical",
     "twin_quotient_conway",
 ]

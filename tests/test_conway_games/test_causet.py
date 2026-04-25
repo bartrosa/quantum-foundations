@@ -40,3 +40,10 @@ def test_manual_conway_well_formed() -> None:
         past_right=(frozenset(), frozenset()),
     )
     assert c.is_well_formed()
+
+
+def test_density_profile_constant_across_n() -> None:
+    for n in [20, 50, 100]:
+        c = build_random_conway_causet(n_target=n, max_rank=max(2, n // 4), seed=42)
+        max_per_rank = max(sum(1 for r in c.rank if r == k) for k in set(c.rank))
+        assert max_per_rank <= 15

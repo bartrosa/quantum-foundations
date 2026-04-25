@@ -28,6 +28,7 @@ References:
     * ``papers/entropic-causets/COMPANION.md`` — paper-side mapping of claims to
       code.
 """
+
 from quantum_foundations.entropic_causets.automorphism import (
     aut_order,
     log_aut_order,

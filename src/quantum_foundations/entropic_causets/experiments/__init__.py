@@ -4,6 +4,7 @@ Call :func:`run` on ``e1_aut_scaling``, ``e2_gibbs``, or ``e3_verlinde`` after c
 ``quantum_foundations`` logging in the main process. Entry points: ``qf-run-e1``,
 ``qf-run-e2``, ``qf-run-e3`` in :mod:`quantum_foundations.cli`.
 """
+
 from quantum_foundations.entropic_causets.experiments.e1_aut_scaling import (
     E1LinearFit,
     E1Result,

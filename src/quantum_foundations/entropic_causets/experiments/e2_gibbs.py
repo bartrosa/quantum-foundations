@@ -1,4 +1,5 @@
 """E2: discrete Gibbs check on |Aut| and S_A for disjoint union (iso vs non-iso)."""
+
 from __future__ import annotations
 
 import csv
@@ -10,6 +11,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from quantum_foundations.entropic_causets.automorphism import aut_order
 from quantum_foundations.entropic_causets.causet import build_stratified_game_causet, disjoint_union
@@ -31,9 +33,7 @@ def _ln_binom(n: int, k: int) -> float:
     if k < 0 or k > n:
         return float("-inf")
     return float(
-        math.lgamma(float(n) + 1.0)
-        - math.lgamma(float(k) + 1.0)
-        - math.lgamma(float(n - k) + 1.0)
+        math.lgamma(float(n) + 1.0) - math.lgamma(float(k) + 1.0) - math.lgamma(float(n - k) + 1.0)
     )
 
 
@@ -155,6 +155,7 @@ def run(
     seeds: int = 30,
     ns: tuple[int, ...] = (15, 20),
     global_seed: int = 20260425,
+    log_queue: Any | None = None,
 ) -> E2Result:
     """Check disjoint-union |Aut| and S_A identities for iso / non-iso causet pairs."""
     needed = seeds * len(ns) * 3
@@ -193,7 +194,12 @@ def run(
             trial += 1
 
     row_list: list[E2Row] = []
-    for row, diag in iter_pool_unordered(_task_to_row, tasks, n_workers=n_workers):
+    for row, diag in iter_pool_unordered(
+        _task_to_row,
+        tasks,
+        n_workers=n_workers,
+        log_queue=log_queue,
+    ):
         for level, msg in diag.messages:
             logger.log(level, "[%s] %s", diag.task_id, msg)
         logger.info(

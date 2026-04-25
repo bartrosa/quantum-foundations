@@ -1,4 +1,5 @@
 """Positional entropy, full entropy decompositions, and Gibbs-corrected unions."""
+
 from __future__ import annotations
 
 import logging

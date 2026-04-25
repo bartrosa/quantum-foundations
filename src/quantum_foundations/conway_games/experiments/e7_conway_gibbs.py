@@ -58,7 +58,7 @@ class E7Result:
 
 def run(
     *,
-    seeds: int = 10,
+    seeds: int = 30,
     ns: tuple[int, ...] = (10, 15, 20),
     global_seed: int = 20260425,
 ) -> E7Result:
@@ -69,12 +69,17 @@ def run(
     for n in ns:
         for kind in ("iso", "noniso"):
             for _ in range(seeds):
-                c1 = build_random_conway_causet(n_target=n, max_rank=8, seed=child[i])
+                # Keep events-per-rank roughly stable across N during sweeps.
+                c1 = build_random_conway_causet(
+                    n_target=n, max_rank=max(2, n // 4), seed=child[i]
+                )
                 i += 1
                 if kind == "iso":
                     c2 = c1
                 else:
-                    c2 = build_random_conway_causet(n_target=n, max_rank=8, seed=child[i])
+                    c2 = build_random_conway_causet(
+                        n_target=n, max_rank=max(2, n // 4), seed=child[i]
+                    )
                     i += 1
                 u = disjoint_union_conway(c1, c2)
                 d1 = entropy_decomposition_conway(c1)
@@ -83,7 +88,9 @@ def run(
                 exp = 2.0 if kind == "iso" else 1.0
                 expected_ln = math.log(exp)
                 dev_pos = du.log_aut_pos - (d1.log_aut_pos + d2.log_aut_pos + expected_ln)
-                dev_twin = du.log_aut_twin - (d1.log_aut_twin + d2.log_aut_twin + expected_ln)
+                dev_twin = du.log_aut_twin_local - (
+                    d1.log_aut_twin_local + d2.log_aut_twin_local + expected_ln
+                )
                 if kind == "iso":
                     s_a_exp = (
                         math.lgamma(float(2 * n) + 1.0)
@@ -106,11 +113,12 @@ def run(
                         log_aut1_pos=d1.log_aut_pos,
                         log_aut2_pos=d2.log_aut_pos,
                         log_aut_union_pos=du.log_aut_pos,
-                        log_aut1_twin=d1.log_aut_twin,
-                        log_aut2_twin=d2.log_aut_twin,
-                        log_aut_union_twin=du.log_aut_twin,
+                        log_aut1_twin=d1.log_aut_twin_local,
+                        log_aut2_twin=d2.log_aut_twin_local,
+                        log_aut_union_twin=du.log_aut_twin_local,
                         ratio_pos=du.aut_order_pos / (d1.aut_order_pos * d2.aut_order_pos),
-                        ratio_twin=du.aut_order_twin / (d1.aut_order_twin * d2.aut_order_twin),
+                        ratio_twin=du.aut_order_twin_local
+                        / (d1.aut_order_twin_local * d2.aut_order_twin_local),
                         expected_ln=expected_ln,
                         deviation_pos=dev_pos,
                         deviation_twin=dev_twin,

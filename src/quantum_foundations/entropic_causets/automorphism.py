@@ -4,6 +4,7 @@ Backends: optional ``pynauty`` (C/nauty) with vertex colours by rank, or
 ``networkx`` :class:`DiGraphMatcher` exact enumeration. Library code only logs; no
 ``basicConfig`` here.
 """
+
 from __future__ import annotations
 
 import logging

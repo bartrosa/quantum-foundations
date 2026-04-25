@@ -3,16 +3,20 @@
 Worker processes must not attach logging handlers: they return :class:`TaskDiagnostic`
 bundles so the main process can emit ordered log records.
 """
+
 from __future__ import annotations
 
 import multiprocessing
 import os
 from collections.abc import Callable, Iterable, Iterator
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import TypeVar, cast
+from functools import partial
+from typing import Any, TypeVar, cast
 
 import numpy as np
+
+from quantum_foundations.entropic_causets.logging_setup import configure_worker_logging
 
 T = TypeVar("T")
 R_co = TypeVar("R_co")
@@ -75,12 +79,18 @@ def iter_pool_unordered(
     items: list[T],
     *,
     n_workers: int,
+    log_queue: Any | None = None,
 ) -> Iterator[tuple[R_co, TaskDiagnostic]]:
     """Apply *func* in a process pool; yield ``(result, TaskDiagnostic)`` as futures complete."""
     with ProcessPoolExecutor(
         max_workers=n_workers,
         mp_context=multiprocessing.get_context("spawn"),
+        initializer=(
+            cast(Callable[[], object], partial(configure_worker_logging, log_queue))
+            if log_queue is not None
+            else None
+        ),
     ) as pool:
         futures = [pool.submit(func, item) for item in items]
-        for future in maybe_tqdm(futures, total=len(futures), desc="tasks"):
+        for future in maybe_tqdm(as_completed(futures), total=len(futures), desc="tasks"):
             yield future.result()

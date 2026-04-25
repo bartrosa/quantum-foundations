@@ -1,4 +1,5 @@
 """E1: |Aut| scaling and full entropy decomposition (log–linear fit + CSV/JSON)."""
+
 from __future__ import annotations
 
 import csv
@@ -216,6 +217,7 @@ def run(
     sample_rate: float = 0.2,
     global_seed: int = 20260425,
     backend: str = "auto",
+    log_queue: Any | None = None,
 ) -> E1Result:
     """Run the E1 |Aut| sweep: one draw and one decomposition per (n, seed)."""
     total_tasks = len(ns) * seeds
@@ -245,7 +247,12 @@ def run(
 
     row_list: list[E1Row] = []
     done = 0
-    for row, diag in iter_pool_unordered(_run_task, tasks, n_workers=n_workers):
+    for row, diag in iter_pool_unordered(
+        _run_task,
+        tasks,
+        n_workers=n_workers,
+        log_queue=log_queue,
+    ):
         for level, msg in diag.messages:
             logger.log(level, "[%s] %s", diag.task_id, msg)
         if diag.status == "skip":

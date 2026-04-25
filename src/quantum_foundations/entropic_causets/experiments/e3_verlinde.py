@@ -1,4 +1,5 @@
 """E3: ΔS between mass-motif placement at combinatorial distance *r* vs “at infinity”."""
+
 from __future__ import annotations
 
 import csv
@@ -170,8 +171,7 @@ def _attempt_placement_at_distance(
     msgs.append(
         (
             logging.DEBUG,
-            f"  m2 anchored at i={m2} rank={background.rank[m2]} "
-            f"target_right={target_right}",
+            f"  m2 anchored at i={m2} rank={background.rank[m2]} target_right={target_right}",
         )
     )
 
@@ -414,6 +414,7 @@ def run(
     rs: tuple[int, ...] = (2, 3, 4, 5, 7, 10, 15, 20),
     n_background: int = 20,
     global_seed: int = 20260425,
+    log_queue: Any | None = None,
 ) -> E3Result:
     """Run E3 over all ``(r, seed)`` pairs; workers return structured diagnostics for logging.
 
@@ -437,7 +438,7 @@ def run(
             idx += 1
 
     out_rows: list[E3Row] = []
-    for row, diag in iter_pool_unordered(_e3_task, tasks, n_workers=n_workers):
+    for row, diag in iter_pool_unordered(_e3_task, tasks, n_workers=n_workers, log_queue=log_queue):
         for level, msg in diag.messages:
             logger.log(level, "[%s] %s", diag.task_id, msg)
         if diag.status == "skip":

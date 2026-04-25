@@ -5,6 +5,7 @@ non-negative *rank* and a set of *immediate* predecessors of strictly lower rank
 transitive-closure table). Callers and experiments use this representation together with
 :mod:`automorphism` and :mod:`entropy`.
 """
+
 from __future__ import annotations
 
 import logging

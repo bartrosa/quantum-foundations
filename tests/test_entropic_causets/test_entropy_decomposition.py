@@ -1,4 +1,5 @@
 """Tests for entropy decomposition, twin quotient, and S_A Gibbs identities."""
+
 from __future__ import annotations
 
 import math
@@ -114,9 +115,7 @@ def test_gibbs_s_a_isomorphic_union() -> None:
             edu = entropy_decomposition(u)
             extra = edu.s_a_pos - 2 * edc.s_a_pos
             expected = float(
-                math.lgamma(float(2 * n) + 1.0)
-                - 2.0 * math.lgamma(float(n) + 1.0)
-                - math.log(2.0)
+                math.lgamma(float(2 * n) + 1.0) - 2.0 * math.lgamma(float(n) + 1.0) - math.log(2.0)
             )
             assert abs(extra - expected) < 1e-9
 
