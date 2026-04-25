@@ -261,14 +261,56 @@ For shallow outcomes:
 
 Recursive outcomes are computed separately via memoized descent.
 
+### 11.2 Twin equivalence — canonical vs local
+
+We define two twin equivalences on Conway causets, capturing different
+notions of indistinguishability.
+
+**Definition 11.2.1 (Canonical twin equivalence).**
+Events `e_1, e_2` are canonical-twins, written `e_1 ~_C e_2`, iff
+
+- `rank(e_1) = rank(e_2)`,
+- `P_L(e_1) = P_L(e_2)`,
+- `P_R(e_1) = P_R(e_2)`.
+
+**Definition 11.2.2 (Local twin equivalence).**
+Events `e_1, e_2` are local-twins, written `e_1 ~_L e_2`, iff `e_1 ~_C e_2`
+and additionally
+
+- `child_L(e_1) = child_L(e_2)`,
+- `child_R(e_1) = child_R(e_2)`,
+
+where `child_*(e)` is the set of events that include `e` in their `P_*` set.
+
+**Lemma 11.2.3 (Local twin lemma).**
+For any Conway causet `C`,
+
+`|Aut_LR(C)| = |Aut_LR(C/~_L)| * prod_{tau in C/~_L} k_tau!`
+
+where `k_tau` is the size of local twin class `tau`.
+
+**Lemma 11.2.4 (Canonical twin inequality).**
+For any Conway causet `C`,
+
+`|Aut_LR(C)| <= |Aut_LR(C/~_C)| * prod_{tau in C/~_C} k_tau!`
+
+with equality iff `~_C = ~_L`.
+
+**Remark 11.2.5 (Physical interpretation).**
+The gap
+
+`Delta_canonical_local := log|Aut_LR(C/~_C)| - log|Aut_LR(C/~_L)| >= 0`
+
+measures additional rigidity from downstream colored structure beyond
+past-equivalence.
+
 ### Coarse-graining relations
 
-- Twin relation: identical local colored neighborhood `(rank, P_L, P_R, child_L, child_R)`.
 - Outcome relation (shallow): identical `(rank, shallow_outcome)`.
 
 Entropy hierarchy in algebraic convention:
 
-`S_rank ≥ S_pos ≥ S_twin ≥ S_outcome ≥ 0`.
+`S_rank ≥ S_pos ≥ S_canonical ≥ S_local ≥ S_outcome ≥ 0`.
 
 Each step is a surjective quotient on state labels/orbits, so logarithmic
 counts cannot increase under coarse-graining.
