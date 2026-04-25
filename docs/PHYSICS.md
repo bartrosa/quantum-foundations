@@ -148,6 +148,26 @@ Scope limit: this is a **structural** Conway extension. We do not implement full
 Conway algebra (disjunctive sum, canonical reduction, surreal values) in this
 iteration.
 
+### 8.3 Conway extension hypothesis
+
+For bare random causets (entropic-causets baseline), measurements indicated
+`|Aut(C/~_twin)| = 1` in the tested regime. Conway edge-coloring asks whether
+this past-only rigidity still holds.
+
+Two alternatives:
+
+- **(H_break):** edge coloring breaks past-only rigidity, so typical Conway
+  causets satisfy `|Aut_LR(C/~_canonical)| > 1`.
+- **(H_keep):** edge coloring keeps past-only rigidity, so typical Conway
+  causets satisfy `|Aut_LR(C/~_canonical)| = 1` (or numerically near zero in logs).
+
+E4 reports canonical and local twin quotients side-by-side:
+
+- canonical quotient (`rank, P_L, P_R`) is the hypothesis observable;
+- local quotient (`+ child_L, child_R`) is a diagnostic floor.
+
+The primary signal is `mean_log_aut_twin_canonical` over `N`.
+
 ## 9. Observability and reproducibility
 
 The CLI entry points ``qf-run-e1``, ``qf-run-e2``, and ``qf-run-e3`` call
