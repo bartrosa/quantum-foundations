@@ -36,6 +36,10 @@ qf-verify-edge-fano = "quantum_foundations.cli:main_verify_edge_fano"
 qf-run-e1 = "quantum_foundations.cli:main_run_e1_aut_scaling"
 qf-run-e2 = "quantum_foundations.cli:main_run_e2_gibbs"
 qf-run-e3 = "quantum_foundations.cli:main_run_e3_verlinde"
+qf-run-e4 = "quantum_foundations.cli:main_run_e4_conway_aut_scaling"
+qf-run-e5 = "quantum_foundations.cli:main_run_e5_outcome_distribution"
+qf-run-e6 = "quantum_foundations.cli:main_run_e6_hierarchy_collapse"
+qf-run-e7 = "quantum_foundations.cli:main_run_e7_conway_gibbs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/quantum_foundations"]
