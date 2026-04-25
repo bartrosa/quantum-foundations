@@ -304,6 +304,45 @@ The gap
 measures additional rigidity from downstream colored structure beyond
 past-equivalence.
 
+### 11.3 Generator design and aut-group rigidity
+
+The aut-group order |Aut(C)| of a Conway causet C depends sensitively on
+how C was constructed. Empirical findings from E8 (60 seeds × 4 N values
+× 5 stochastic generators):
+
+**Edge-color density determines structural rigidity.** Define the LR-edge
+fraction:
+
+$$
+f_{LR}(C) = \frac{|\{(i,j) \in E(C) : i \in P_L(j) \cap P_R(j)\}|}{|\{(i,j) \in E(C) : i \in P_L(j) \cup P_R(j)\}|}
+$$
+
+Stochastic builders with high $f_{LR}$ (e.g., `random_overlap_05` with
+per-edge LR coin flip → $f_{LR} \approx 0.5$) produce significantly more
+nontrivial automorphisms than builders with low $f_{LR}$ (independent
+sampling → $f_{LR} \approx s_L \cdot s_R$ where $s_L, s_R$ are sample
+rates).
+
+**Mechanism.** An LR-edge is invariant under any color-preserving
+automorphism, since it is already in both color classes. Pure L- or R-edges
+impose color-preservation constraints that restrict permutations.
+Higher $f_{LR}$ → fewer constraints → larger |Aut|.
+
+**Limitation of the canonical twin lemma.** For low-$f_{LR}$ generators
+(`coupled_pool_*`), |Aut(C)| = 1 across all observed seeds, but
+|Aut(C/~_canonical)| > 1 occurs in approximately 7% of small-N seeds.
+This shows the canonical-twin inequality from §11.2 is **strict** in a
+non-trivial fraction of cases, not just a theoretical possibility.
+
+The local-twin lemma remains exact: |Aut(C/~_local)| = 0 in all observed
+cases for stochastic builders.
+
+**Asymptotic behavior.** All stochastic generators show
+$\mathbb{E}[\log|Aut(C)|] \to 0$ as N grows. The decay rate varies by
+builder but the asymptotic limit is uniform.
+
+(Summary for physics readers: `docs/PHYSICS.md` §8.4.)
+
 ### Coarse-graining relations
 
 - Outcome relation (shallow): identical `(rank, shallow_outcome)`.

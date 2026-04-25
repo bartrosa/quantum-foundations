@@ -168,6 +168,81 @@ E4 reports canonical and local twin quotients side-by-side:
 
 The primary signal is `mean_log_aut_twin_canonical` over `N`.
 
+### 8.4 Generator comparison summary (E8)
+
+The E8 experiment compares observables across multiple Conway causet
+generators: stochastic (random sampling, coupled-pool) and deterministic
+(canonical Conway games). Three findings structure the negative result
+about Conway extension's first iteration.
+
+#### Finding 1: All canonical Conway games have |Aut| = 1
+
+Eleven canonical Conway game constructors (`make_zero`, `make_star`,
+`make_nimber(k)`, `make_integer(n)`, `make_up`, `make_down`,
+`make_switch(a, 0)`, `make_balanced_binary_tree(d)`) all yield |Aut| = 1
+in our framework. This is robust to relaxing the rank-preserving constraint
+on automorphisms — even pure edge-color-preserving graph automorphisms give
+|Aut| = 1.
+
+This is a structural fact about ConwayCauset encoding: each event in a
+canonical game tree is uniquely identifiable by its in-degree, out-degree,
+and edge-coloring context. There is no abstract Conway-game-theoretic
+symmetry preserved by graph automorphism. Game-theoretic richness lives
+in **recursive outcome computation** and **canonical form equivalence**,
+not in graph automorphism.
+
+#### Finding 2: Stochastic builder mechanism dominates the signal
+
+Across five stochastic generator families, mean log|Aut(C)| varies by 5×:
+
+| Generator | mean log|Aut| @ N=15 | rate(δ_canonical_local > 0) @ N=15 |
+|-----------|----------------------|-------------------------------------|
+| `random_default` (independent sampling) | 0.383 | 0% |
+| `random_overlap_05` (per-edge LR coin flip) | **1.692** | **17%** |
+| `coupled_pool_00` (disjoint L/R pools) | 0.000 | 7% |
+| `coupled_pool_05` (mixed pools) | 0.000 | 0% |
+| `coupled_pool_10` (single shared pool) | 0.000 | 0% |
+
+The dominant signal in `random_overlap_05` traces to **LR-edge density**.
+A per-edge coin flip with `overlap_rate = 0.5` produces approximately 50%
+LR-edges, whereas independent sampling within shared pools produces only
+~9% (= sample_rate²). LR-edges weaken aut-group constraints: an LR-edge
+maps to LR-edge under any color-preserving permutation, allowing the
+permutation to act on its endpoints without fixing per-side color identity.
+
+This signal is therefore **structural** (LR-edge density), not Conway
+game-theoretic. It does not increase under coupled-pool overlap because
+that builder's overlap is statistical, not per-edge enforced.
+
+#### Finding 3: Asymptotic collapse for all generators
+
+Even the strongest stochastic family (`random_overlap_05`) decays with N:
+mean log|Aut| from 1.69 (N=15) to 0.05 (N=50), with rate(δ > 0) from 17%
+(N=15) to 0% (N=30+). Other stochastic families are weaker but show the
+same pattern. Deterministic generators are at zero throughout.
+
+For N ≥ 70 we expect all generators to converge to |Aut| = 1, matching
+bare-causet behavior. Conway extension is in this sense a **finite-size
+phenomenon** dependent on builder design.
+
+#### Open questions for next iteration
+
+- **Does any builder design produce N-persistent signal?** Trying:
+  scale-free LR-edge enforcement (rate proportional to log N), forced-swap
+  causet construction (events explicitly placed in twin pairs), or
+  Hackenbush-style explicit symmetric trees.
+- **Game-equivalence quotient.** Counting Conway games modulo canonical
+  form equivalence (rather than graph isomorphism) is the natural way to
+  expose game-theoretic structure. Out of scope for current framework
+  (needs canonicalization algorithm); flagged for future work.
+- **Loopy / temperate / hot games.** Switches `{a|b}` with a > b are
+  encoded but their thermography (Conway temperature) is not measured by
+  our observables. Future iteration should add `temperature_estimate(c)`
+  via mean field on game value computation.
+
+(See `docs/MATH.md` §11.3 for the LR-edge fraction formalism and twin-lemma
+limitations in terms of E8.)
+
 ## 9. Observability and reproducibility
 
 The CLI entry points ``qf-run-e1``, ``qf-run-e2``, and ``qf-run-e3`` call
