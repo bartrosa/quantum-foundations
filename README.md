@@ -59,6 +59,28 @@ uv run pytest
 
 If your GitHub username or repo name differs from `bartrosa/quantum-foundations`, update the clone URL here and the `\url{...}` in the paper acknowledgments.
 
+## Entropic causets
+
+- **Paper companion**: [`papers/entropic-causets/COMPANION.md`](papers/entropic-causets/COMPANION.md)
+- **Module**: `quantum_foundations.entropic_causets`
+- **Notebooks** (`papers/entropic-causets/notebooks/`): run `uv sync` (or `make sync`); `pandas` and `matplotlib` are project dependencies, so the repo venv can import them. In Jupyter, pick the kernel that uses that environment.
+- **Logs**: `qf-run-e1` / `e2` / `e3` also write `papers/entropic-causets/results/e{1,2,3}_*.log` (gitignored) with DEBUG detail and INFO on stdout.
+- **CLI**:
+  - `uv run qf-run-e1` — E1 |Aut| scaling sweep
+  - `uv run qf-run-e2` — E2 Gibbs paradox exact test
+  - `uv run qf-run-e3` — E3 Verlinde-style distance sanity check
+
+## Conway games extension
+
+- **Companion**: [`papers/conway-causets/COMPANION.md`](papers/conway-causets/COMPANION.md)
+- **Module**: `quantum_foundations.conway_games`
+- **CLI**:
+  - `uv run qf-run-e4` — E4 Conway automorphism scaling
+  - `uv run qf-run-e5` — E5 four-valued outcome distribution
+  - `uv run qf-run-e6` — E6 hierarchy collapse rates
+  - `uv run qf-run-e7` — E7 Conway Gibbs checks
+- **Make target**: `make run-conway`
+
 ## License
 
 MIT — see `LICENSE`.
