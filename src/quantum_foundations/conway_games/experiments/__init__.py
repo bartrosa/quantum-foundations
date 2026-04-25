@@ -1,10 +1,11 @@
-"""Conway experiment drivers: E4-E7."""
+"""Conway experiment drivers: E4-E8."""
 
-from quantum_foundations.conway_games.experiments import (
+from . import (
     e4_conway_aut_scaling,
     e5_outcome_distribution,
     e6_hierarchy_collapse,
     e7_conway_gibbs,
+    e8_generator_comparison,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "e5_outcome_distribution",
     "e6_hierarchy_collapse",
     "e7_conway_gibbs",
+    "e8_generator_comparison",
 ]

@@ -13,6 +13,7 @@ from quantum_foundations.conway_games.experiments import (
     e5_outcome_distribution,
     e6_hierarchy_collapse,
     e7_conway_gibbs,
+    e8_generator_comparison,
 )
 from quantum_foundations.entropic_causets.experiments import (
     e1_aut_scaling,
@@ -329,3 +330,61 @@ def main_run_e7_conway_gibbs() -> None:
         )
     finally:
         listener.stop()
+
+
+def _parse_e8_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run E8 generator comparison experiment.")
+    parser.add_argument("--n-workers", type=int, default=4)
+    parser.add_argument("--seeds", type=int, default=30)
+    parser.add_argument("--max-n", type=int, default=50)
+    parser.add_argument(
+        "--task-timeout",
+        type=float,
+        default=e8_generator_comparison.DEFAULT_PER_TASK_TIMEOUT_S,
+    )
+    parser.add_argument(
+        "--recursive-max-n",
+        type=int,
+        default=e8_generator_comparison.DEFAULT_RECURSIVE_MAX_N,
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("papers/conway-causets/results"),
+    )
+    return parser.parse_args()
+
+
+def main_run_e8() -> None:
+    """qf-run-e8: comparative run across all Conway causet generators."""
+    args = _parse_e8_args()
+    log_path, listener, log_queue = configure_main_process_logging(
+        "e8_generator_comparison",
+        args.output_dir,
+    )
+    listener.start()
+    log = logging.getLogger("quantum_foundations.cli.e8")
+    log.info("starting E8 with args: %s", vars(args))
+    interrupted = False
+    try:
+        result = e8_generator_comparison.run(
+            n_workers=args.n_workers,
+            seeds=args.seeds,
+            max_n=args.max_n,
+            log_queue=log_queue,
+            task_timeout_s=args.task_timeout,
+            recursive_max_n=args.recursive_max_n,
+        )
+        e8_generator_comparison.write_outputs(result, args.output_dir)
+        log.info("E8 finished | n_rows=%d | log=%s", len(result.rows), log_path)
+    except KeyboardInterrupt:
+        interrupted = True
+        log.warning("CLI caught KeyboardInterrupt that escaped run()")
+    finally:
+        try:
+            listener.stop()
+        except Exception:
+            pass
+    if interrupted:
+        _flush_logging_handlers()
+        os._exit(130)
