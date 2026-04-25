@@ -25,7 +25,7 @@ from quantum_foundations.entropic_causets.logging_setup import configure_worker_
 from quantum_foundations.entropic_causets.parallel import TaskDiagnostic, spawn_task_seeds
 
 logger = logging.getLogger(__name__)
-PER_TASK_TIMEOUT_S = 30.0
+PER_TASK_TIMEOUT_S = 600.0
 
 
 @dataclass(frozen=True, slots=True)

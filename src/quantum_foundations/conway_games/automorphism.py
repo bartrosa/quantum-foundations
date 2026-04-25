@@ -81,12 +81,19 @@ def _aut_order_pynauty(causet: ConwayCauset) -> int:
 
 
 def _resolve_backend(backend: str) -> str:
+    """Resolve backend name for Conway automorphism counting.
+
+    The Conway extension uses edge-colored subdivision graphs where ``pynauty``
+    can hit severe backtracking cases; use ``networkx`` as default resolver
+    for ``auto``.
+    """
     if backend not in ("auto", "pynauty", "networkx"):
         raise ValueError(f"backend must be 'auto', 'pynauty', or 'networkx', got {backend!r}")
     if backend == "auto":
         if _PYNAUTY_AVAILABLE:
-            return "pynauty"
-        logger.warning("pynauty missing: Conway aut_order fallback to networkx")
+            logger.debug("Conway aut_order auto backend resolved to networkx")
+        else:
+            logger.warning("pynauty missing: Conway aut_order auto backend uses networkx")
         return "networkx"
     if backend == "pynauty" and not _PYNAUTY_AVAILABLE:
         raise RuntimeError("pynauty backend requested but pynauty is not installed")
@@ -99,8 +106,17 @@ _AUT_BACKENDS: dict[str, Callable[[ConwayCauset], int]] = {
 }
 
 
-def aut_order_conway(causet: ConwayCauset, *, backend: str = "auto") -> int:
-    """Count rank- and edge-color-preserving automorphisms of a Conway causet."""
+def aut_order_conway(causet: ConwayCauset, *, backend: str = "networkx") -> int:
+    """Order of the rank- and edge-color-preserving automorphism group.
+
+    Backends:
+        ``networkx`` (default): VF2 isomorphism with rank node-match and
+            edge-color match. This is the recommended default for Conway
+            edge-colored causets.
+        ``pynauty``: edge subdivision + vertex coloring encoded for nauty.
+            Kept for parity checks against ``networkx``.
+        ``auto``: resolves to ``networkx``.
+    """
     if causet.n == 0:
         return 1
     chosen = _resolve_backend(backend)
